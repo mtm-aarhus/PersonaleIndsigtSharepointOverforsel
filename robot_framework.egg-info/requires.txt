@@ -1,0 +1,11 @@
+OpenOrchestrator==3.*
+Pillow==10.*
+requests==2.32.*
+requests_ntlm==1.3.0
+Office365-REST-Python-Client==2.6.2
+sqlalchemy
+pyodbc==5.2.0
+
+[dev]
+pylint
+flake8
