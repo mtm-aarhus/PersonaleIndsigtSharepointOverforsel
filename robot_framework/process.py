@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text
 
 from GoDokumenter import create_session, derive_sagsnummer, hent_sagsurl, list_case_documents, download_case_file
-from SharepointOverforsel import sharepoint_client, opret_destinationsmappe, upload_filer, generer_udleveringslink
+from SharepointOverforsel import sharepoint_client, opret_destinationsmappe, upload_filer, generer_udleveringslink, hent_permanent_link
 
 
 def process(orchestrator_connection: OrchestratorConnection, queue_element: QueueElement | None = None) -> None:
@@ -48,6 +48,9 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     # 3 - Generer tidsbegrænset, adgangskodebeskyttet udleveringslink
     link, password = generer_udleveringslink(case_folder, expiration_days=30)
 
+    # 3b - Konstruer det permanente mappelink til sagsbehandlere
+    sagsbehandlerlink = hent_permanent_link(sharepoint_url, case_folder)
+
     # 4 - Skriv link + adgangskode tilbage på sagen
     orchestrator_connection.log_info('Logging info to database')
     SQL_SERVER = orchestrator_connection.get_constant('SqlServer').value
@@ -66,6 +69,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
         UPDATE dbo.cases
         SET sharepoint_udleveringslink = :link,
             sharepoint_udleveringslink_password = :password,
+            sharepoint_sagsbehandlerlink = :sagsbehandlerlink,
             last_run_transfer_sharepoint = :ts
         WHERE aktid = :caseid
     """)
@@ -74,6 +78,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
         result = conn.execute(sql, {
             "link": link,
             "password": password,
+            "sagsbehandlerlink": sagsbehandlerlink,
             "ts": datetime.now(),
             "caseid": str(caseid)
         })

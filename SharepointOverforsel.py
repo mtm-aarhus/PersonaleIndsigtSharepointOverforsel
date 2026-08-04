@@ -72,6 +72,15 @@ def upload_filer(ctx, case_folder, files):
         ctx.execute_query()
 
 
+def hent_permanent_link(sharepoint_url, case_folder):
+    """Returns the case folder's normal, permanent web URL — the one a case
+    handler with ordinary Sharepoint access can open directly — as opposed to
+    the time-limited, password-protected link from generer_udleveringslink.
+    """
+    tenant_host = sharepoint_url.split(".com")[0] + ".com"
+    return tenant_host + case_folder.serverRelativeUrl
+
+
 def generer_udleveringslink(case_folder, expiration_days=30):
     """Generates a time-limited, password-protected Sharepoint sharing link for
     the given folder.
