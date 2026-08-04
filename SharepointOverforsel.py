@@ -72,7 +72,7 @@ def upload_filer(ctx, case_folder, files):
         ctx.execute_query()
 
 
-def generer_udleveringslink(case_folder, expiration_days=30):
+def generer_udleveringslink(case_folder, expiration_days=1):
     """Generates a time-limited, password-protected Sharepoint sharing link for
     the given folder.
 
